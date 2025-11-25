@@ -16,8 +16,8 @@ public class ThinkRaceV22Protocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                // MT4 sends ASCII IW...# lines, possibly long because of AP lists
-                pipeline.addLast(new LineBasedFrameDecoder(16 * 1024));
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '#'));
+                pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new ThinkRaceV22ProtocolDecoder(ThinkRaceV22Protocol.this));
             }
