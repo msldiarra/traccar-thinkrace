@@ -54,10 +54,11 @@ public class UniversalGeolocationProvider implements GeolocationProvider {
                         callback.onFailure(new GeolocationException(json.getJsonObject("error").getString("message")));
                     } else {
                         JsonObject location = json.getJsonObject("location");
-                        callback.onSuccess(
-                                location.getJsonNumber("lat").doubleValue(),
-                                location.getJsonNumber("lng").doubleValue(),
-                                json.getJsonNumber("accuracy").doubleValue());
+                        double lat = location.getJsonNumber("lat").doubleValue();
+                        double lng = location.getJsonNumber("lng").doubleValue();
+                        double accuracy = json.getJsonNumber("accuracy").doubleValue();
+                        System.err.println("[Geolocation] Parsed: lat=" + lat + ", lng=" + lng);
+                        callback.onSuccess(lat, lng, accuracy);
                     }
                 }
 
