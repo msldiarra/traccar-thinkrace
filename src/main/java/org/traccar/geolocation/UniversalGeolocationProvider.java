@@ -34,6 +34,16 @@ public class UniversalGeolocationProvider implements GeolocationProvider {
 
     @Override
     public void getLocation(Network network, final LocationProviderCallback callback) {
+        try {
+            // Afficher exactement ce qui est envoyé
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            String json = mapper.writeValueAsString(network);
+            System.out.println("[Geolocation] URL: " + url);
+            System.out.println("[Geolocation] Body: " + json);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         client.target(url).request().async().post(Entity.json(network), new InvocationCallback<JsonObject>() {
             @Override
             public void completed(JsonObject json) {
