@@ -58,10 +58,22 @@ public class ThinkRaceV22ProtocolDecoder extends BaseProtocolDecoder {
             .text(",")
             .expression("(")
             .groupBegin()
+            .expression("[^|]+")                          // name (AP1, AP2, etc.)
+            .expression("\\|([0-9a-fA-F:]+)\\|")         // MAC address (hex avec :)
+            .expression("(-?\\d+)")                       // signal strength (peut être négatif)
+            .expression("&?")                             // optional separator
+            .groupEnd("+")
+            .expression(")")
+            .groupEnd("?")
+            /* Original wifi code */
+            /* .groupBegin()
+            .text(",")
+            .expression("(")
+            .groupBegin()
             .expression("[^\\|]+")               // name
             .number("|xx-xx-xx-xx-xx-xx")        // mac
             .number("|d+&?")                     // signal
-            .groupEnd("+")
+            .groupEnd("+")*/
             .expression(")")
             .groupEnd("?")
             .any()
