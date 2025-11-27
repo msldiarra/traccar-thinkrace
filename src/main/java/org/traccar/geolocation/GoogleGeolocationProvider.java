@@ -15,14 +15,69 @@
  */
 package org.traccar.geolocation;
 
+import org.traccar.model.Network;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.InvocationCallback;
+import jakarta.ws.rs.core.MediaType;
+
 
 public class GoogleGeolocationProvider extends UniversalGeolocationProvider {
 
     private static final String URL = "https://www.googleapis.com/geolocation/v1/geolocate";
+    private final Client client;
+    private final String url;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public GoogleGeolocationProvider(Client client, String key) {
         super(client, URL, key);
+        this.client = client;
+        this.url = URL;
+    }
+
+    @Override
+    public void getLocation(Network network, final LocationProviderCallback callback) {
+        try {
+            String jsonBody = MAPPER.writeValueAsString(network);
+            if (jsonBody.startsWith("{")) {
+                jsonBody = "{\"considerip\":false," + jsonBody.substring(1);
+            }
+
+            System.err.println("[Geolocation] URL: " + url);
+            System.err.println("[Geolocation] Body: " + jsonBody);
+
+            //client.target(url).request().async().post(Entity.json(network), new InvocationCallback<JsonObject>() {
+            client.target(url)
+            .request()
+            .async()
+            .post(Entity.entity(jsonBody, MediaType.APPLICATION_JSON), new InvocationCallback<JsonObject>() {
+                @Override
+                public void completed(JsonObject json) {
+                    System.err.println("[Geolocation] Response: " + json);
+                    if (json.containsKey("error")) {
+                        callback.onFailure(new GeolocationException(json.getJsonObject("error").getString("message")));
+                    } else {
+                        JsonObject location = json.getJsonObject("location");
+                        double lat = location.getJsonNumber("lat").doubleValue();
+                        double lng = location.getJsonNumber("lng").doubleValue();
+                        double accuracy = json.getJsonNumber("accuracy").doubleValue();
+                        System.err.println("[Geolocation] Parsed: lat=" + lat + ", lng=" + lng);
+                        callback.onSuccess(lat, lng, accuracy);
+                    }
+                }
+
+                @Override
+                public void failed(Throwable throwable) {
+                    callback.onFailure(throwable);
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("[Geolocation] Error: " + e.getMessage());
+            callback.onFailure(new GeolocationException(e.getMessage()));
+        }
     }
 
 }
