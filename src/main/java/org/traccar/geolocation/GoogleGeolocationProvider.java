@@ -35,7 +35,7 @@ public class GoogleGeolocationProvider extends UniversalGeolocationProvider {
     public GoogleGeolocationProvider(Client client, String key) {
         super(client, URL, key);
         this.client = client;
-        this.url = URL;
+        this.url = URL + "?key=" + key;
     }
 
     @Override
