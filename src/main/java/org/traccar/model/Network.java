@@ -79,7 +79,7 @@ public class Network {
         this.carrier = carrier;
     }
 
-    private Boolean considerIp = false;
+    private Boolean considerIp = null;
 
     public Boolean getConsiderIp() {
         return considerIp;
