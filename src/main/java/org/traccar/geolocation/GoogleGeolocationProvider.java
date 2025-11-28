@@ -46,11 +46,13 @@ public class GoogleGeolocationProvider extends UniversalGeolocationProvider {
     public void getLocation(Network network, final LocationProviderCallback callback) {
         new Thread(() -> {
             try {
-                String jsonBody = MAPPER.writeValueAsString(network);
+                network.setConsiderIp(false);
+                /**String jsonBody = MAPPER.writeValueAsString(network);
                 if (jsonBody.startsWith("{")) {
                     jsonBody = "{\"considerip\":false," + jsonBody.substring(1);
-                }
+                }**/
 
+                String jsonBody = MAPPER.writeValueAsString(network);
                 System.err.println("[Geolocation] URL: " + url);
                 System.err.println("[Geolocation] Body: " + jsonBody);
 

@@ -152,10 +152,32 @@ public class ThinkRaceV22ProtocolDecoder extends BaseProtocolDecoder {
         for (String wifi : data.split("&")) {
             if (!wifi.isEmpty()) {
                 String[] values = wifi.split("\\|");
-                network.addWifiAccessPoint(WifiAccessPoint.from(
-                        values[1].replace('-', ':'), Integer.parseInt(values[2])));
+                String mac = values[1].replace('-', ':');
+                int signal = Integer.parseInt(values[2]);
+
+                // Filtrer les adresses MAC randomisées (locally administered)
+                if (!isRandomizedMac(mac)) {
+                    network.addWifiAccessPoint(WifiAccessPoint.from(mac, signal));
+                } else {
+                    System.err.println("[WiFi] Skipping randomized MAC: " + mac);
+                }
             }
         }
+    }
+
+    private boolean isRandomizedMac(String mac) {
+        // Le 2ème bit du premier octet indique "locally administered"
+        // Si le 2ème caractère hex est 2, 6, A, ou E → randomisée
+        if (mac == null
+            || mac.length() < 2) {
+            return false;
+        }
+
+        char secondChar = Character.toUpperCase(mac.charAt(1));
+        return secondChar == '2'
+            || secondChar == '6'
+            || secondChar == 'A'
+            || secondChar == 'E';
     }
 
     @Override
